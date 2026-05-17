@@ -42,6 +42,22 @@ def render_conversation():
             elif message["role"] == "assistant":
                 render_assistant_message(message["content"])
 
+                if "chunks" in message:
+
+                    for chunk in message["chunks"]:
+
+                        render_assistant_message(
+                            f"""
+                📄 {chunk['file_name']}
+
+                👤 {chunk['author']}
+
+                ⭐ Confidence Score: {chunk['confidence_score']}
+
+                {chunk['content']}
+                """
+                            )
+
 
 # Handhabt die Benutzereingabe, indem sie die Nachricht des Benutzers zum Session State hinzufügt, eine KI-Antwort generiert 
 # (hier als Platzhalter) und diese ebenfalls zum Session State hinzufügt, bevor die Seite neu geladen wird, um die aktualisierte Konversation anzuzeigen
@@ -59,13 +75,18 @@ def handle_user_input():
 
         # Anfrage an FastAPI senden
         backend_client = BackendClient()
-        response = backend_client.send_chat_message(user_input)
+        response = backend_client.send_chat_message(
+            user_input,
+            st.session_state.chat_settings
+        )
 
         ai_response = response.get("response")
+        chunks = response.get("chunks", [])
 
         st.session_state.messages.append({
             "role": "assistant",
-            "content": ai_response
+            "content": ai_response,
+            "chunks": chunks
         })
 
         st.rerun()

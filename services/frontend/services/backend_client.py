@@ -9,13 +9,18 @@ class BackendClient:
         self.base_url = "http://127.0.0.1:8000"
 
     # Funktion, die eine Chat-Nachricht des Benutzers (= message) an das Backend sendet 
-    def send_chat_message(self, message):
+    def send_chat_message(self, message, chat_settings):
 
         # POST-Anfrage an den /chat-Endpunkt des Backends mit JSON-Daten
         response = requests.post(
             f"{self.base_url}/chat",
             json={
-                "message": message
+                "message": message,
+                "chat_settings": {
+                    "top_k": chat_settings.top_k,
+                    "llm": chat_settings.llm,
+                    "prompting_strategy": chat_settings.prompting_strategy
+                }
             }
         )
 
