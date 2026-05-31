@@ -36,6 +36,7 @@ added timers for eval: -> total = eval + fetch + generation
 - maybe add feature for resp length? small, medium, big // character brackets
 
 - prompt compression (if generation time too big) -> timeout gen > 60s, maybe compress context
+
 - prompt caching (dont see it now)
 - prompt chaining: idk ... kinda did already with tavily
 - reranker: out of scope, part of retrieval?

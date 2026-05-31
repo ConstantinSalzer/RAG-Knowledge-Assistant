@@ -198,8 +198,6 @@ def _parse_stream_line(line_text: str, mode: str) -> str:
 
 # 7. Main Orchestrator Function
 
-import time  # 1. Don't forget to import time!
-
 def generate_rag_response(query: str, chunks: List[Chunk], style: str = "technical", mode: str = "local") -> str:
     
     # Capture start time
@@ -268,9 +266,12 @@ def generate_rag_response(query: str, chunks: List[Chunk], style: str = "technic
 
 # test run
 if __name__ == "__main__":
-    test_query = "Erkläre den Begriff RAG?"         # choose any question, current chunks are regarding RAG
-    test_style = "creative"                        # defensive, technical, creative        
-    test_mode = "local"                               # local, api             
+    test_query = "Erkläre den Begriff RAG?"                     # choose any question, current chunks are regarding RAG
+    test_style = "defensive"                                    # defensive, technical, creative        
+    test_mode = "local"                                         # local, api
+    # test_model_size = "small"                                 # small, medium, (large not supported in local mode right now)
+    # test_resp_len = "small"                                   # small, medium, large (150, 500, 1000 Token)
+
 
     print(f"[INPUT] Asking LLM ({test_style.upper()} Mode) via {test_mode.upper()} engine: {test_query}\n")
     
@@ -280,12 +281,3 @@ if __name__ == "__main__":
         style=test_style,
         mode=test_mode
     )
-
-# interrupt output
-
-try:
-    if __name__ == "__main__":
-        generate_rag_response(...)
-except KeyboardInterrupt:
-    print("\n\n[INFO] Process interrupted by user. Exiting cleanly.")
-    exit(0)

@@ -17,38 +17,35 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: rag_ollama
+    healthcheck:
+      # Native check: uses the ollama CLI to verify the server is responding
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     volumes:
       - ollama_storage:/root/.ollama
     ports:
       - "11434:11434"
-    # For Apple Silicon/Mac, GPU is handled by Docker Desktop automatically.
-    # If on Linux with NVIDIA, uncomment the deploy block below:
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
 
   ollama-pull-models:
-    image: curlimages/curl:latest
+    # Use the same image to ensure the 'ollama' CLI is available
+    image: ollama/ollama:latest
     container_name: ollama_pull_models
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     entrypoint: /bin/sh
     command:
       - "-c"
       - |
-        sleep 5;
-        echo "Downloading Embedding model..."
-        # Adding "stream": false makes curl wait for the full download
-        curl -X POST http://rag_ollama:11434/api/pull -d '{"name": "nomic-embed-text", "stream": false}'
-        
-        echo "Downloading Generation model..."
-        curl -X POST http://rag_ollama:11434/api/pull -d '{"name": "qwen2.5:1.5b", "stream": false}'
-        
-        echo "All models are now local. Exiting."
+        echo "Pulling models..."
+        export OLLAMA_HOST=http://ollama:11434
+        /usr/bin/ollama pull nomic-embed-text
+        /usr/bin/ollama pull qwen2.5:1.5b
+        /usr/bin/ollama pull qwen2.5:7b
+        echo "All models downloaded."
         
   # --- RAG Services ---
   retrieval:
@@ -79,6 +76,8 @@ services:
     env_file: .env
     depends_on:
       - ollama
+    volumes:
+      - ./services/augmentation:/app/services/augmentation
 
   generation:
     build:
