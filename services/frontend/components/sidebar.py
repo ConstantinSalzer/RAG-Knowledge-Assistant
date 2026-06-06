@@ -1,6 +1,7 @@
 import streamlit as st
 from pathlib import Path
 
+from services.frontend_actions import save_current_chat, start_new_chat
 from views.pages import views
 
 def render_sidebar():
@@ -91,7 +92,10 @@ def render_sidebar_actions():
         key="new_chat",
         use_container_width=True
     ):
-        st.toast("Neuer Chat erstellt (Dummy)")
+        save_current_chat()
+        start_new_chat()
+        st.toast("Aktueller Chat gespeichert")
+        st.rerun()
 
     # Button: Chat durchsuchen
     if st.button(
@@ -108,6 +112,7 @@ def render_sidebar_actions():
         use_container_width=True
     ):
         st.toast("Dokument-Upload geöffnet (Dummy)")
+
 
 def render_sidebar_chat_history():
 

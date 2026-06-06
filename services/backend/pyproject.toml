@@ -1,0 +1,12 @@
+[project]
+name = "backend"
+version = "0.1.0"
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "shared",
+]
+
+[tool.uv.sources]
+shared = { workspace = true }

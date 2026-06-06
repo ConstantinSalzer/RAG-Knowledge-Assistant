@@ -1,5 +1,6 @@
 import streamlit as st
 
+
 PAGE_KEY = "statistics"
 PAGE_NAME = "Statistiken"
 PAGE_PATH = "/views/statistics.py"

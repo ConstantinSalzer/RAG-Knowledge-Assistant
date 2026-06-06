@@ -1,8 +1,7 @@
 from pydantic import BaseModel
 from typing import List
-from services.backend.chunks import example_chunks, Chunk
+from schemas import Chunk, ChatSettings
 
-from services.frontend.models.chat_settings import ChatSettings
 
 
 class ChatRequest(BaseModel):

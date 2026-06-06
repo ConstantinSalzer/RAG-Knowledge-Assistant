@@ -1,9 +1,11 @@
 import streamlit as st
-from components.render import render_user_message, render_assistant_message
+from datetime import datetime
+from components.render import render_assistant_actions, render_user_message, render_assistant_message, render_chunk_message, render_chat_settings_panel
 from components.styles import load_chat_styles
-from models.chat_settings import ChatSettings
+from schemas import ChatConversation, ChatMessage, ChatSettings
 from services.backend_client import BackendClient
-from components.chat_settings_panel import render_chat_settings_panel
+from services.frontend_actions import create_conversation_title_from_message
+
 
 PAGE_KEY = "chat"
 PAGE_NAME = "Aktueller Chat"
@@ -16,7 +18,7 @@ def render_chat():
     load_chat_styles()
     init_session_state()
 
-    # Legt einen Container fest, der Chat-Header, Chat-Verlauf und Chat_Input enthält
+    # Legt einen Container fest, der Chat-Header, Chat-Verlauf und Chat-Input enthält
     with st.container(key="chat_page_container"):
         render_chat_header()
 
@@ -30,8 +32,8 @@ def render_chat():
 # Initialisiert den Session State für die aktuelle Konversation (nicht persistente Speicherung im frontend)
 def init_session_state():
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+    if "current_chat_conversation" not in st.session_state:
+        st.session_state.current_chat_conversation = ChatConversation.create_new()
     
     if "chat_settings" not in st.session_state:
         st.session_state.chat_settings = ChatSettings()
@@ -48,9 +50,9 @@ def render_chat_header():
         with title_col:
             st.subheader("Aktueller Chat")
 
-        with button_col:
-            with st.popover("⚙️"):
-                render_chat_settings_panel()
+    with button_col:
+        with st.popover("⚙️"):
+            render_chat_settings_panel()
 
 
 
@@ -58,31 +60,27 @@ def render_chat_header():
 # Rendert die aktuelle Konversation, indem sie durch die gespeicherten Nachrichten im Session State iteriert und sie entsprechend darstellt
 def render_conversation():
 
-    for message in st.session_state.messages:
+    for message_index, message in enumerate(st.session_state.current_chat_conversation.messages):
             
-            if message["role"] == "user":
-                render_user_message(message["content"])
+        if message.role == "user":
+            render_user_message(
+                message.content,
+                message_index,
+                format_message_time(message.created_at)
+            )
 
-            elif message["role"] == "assistant":
-                render_assistant_message(message["content"])
+        elif message.role == "assistant":
+            render_assistant_message(message.content)
 
-                if "chunks" in message:
+            for chunk_index, chunk in enumerate(message.chunks or []):
+                render_chunk_message(chunk, message_index, chunk_index)
 
-                    for chunk in message["chunks"]:
+            render_assistant_actions(
+                message_index,
+                format_message_time(message.created_at)
+            )
 
-                        render_assistant_message(
-                            f"""
-                📄 {chunk['file_name']}
-
-                👤 {chunk['author']}
-
-                ⭐ Confidence Score: {chunk['confidence_score']}
-
-                {chunk['content']}
-                """
-                            )
-
-
+            
 # Handhabt die Benutzereingabe, indem sie die Nachricht des Benutzers zum Session State hinzufügt, eine KI-Antwort generiert 
 # (hier als Platzhalter) und diese ebenfalls zum Session State hinzufügt, bevor die Seite neu geladen wird, um die aktualisierte Konversation anzuzeigen
 def handle_user_input():
@@ -91,11 +89,17 @@ def handle_user_input():
 
     if user_input:
 
+        if st.session_state.current_chat_conversation.title == "Neuer Chat":
+            st.session_state.current_chat_conversation.title = create_conversation_title_from_message(user_input)
+
         #User-Nachricht zum Session State hinzufügen
-        st.session_state.messages.append({
-            "role": "user",
-            "content": user_input
-        })
+        st.session_state.current_chat_conversation.messages.append(
+            ChatMessage(
+                role="user",
+                content=user_input,
+                created_at=datetime.now().isoformat(timespec="seconds")
+            )
+        )
 
         # Anfrage an FastAPI senden
         backend_client = BackendClient()
@@ -107,10 +111,21 @@ def handle_user_input():
         ai_response = response.get("response")
         chunks = response.get("chunks", [])
 
-        st.session_state.messages.append({
-            "role": "assistant",
-            "content": ai_response,
-            "chunks": chunks
-        })
+        st.session_state.current_chat_conversation.messages.append(
+            ChatMessage(
+                role="assistant",
+                content=ai_response,
+                chunks=chunks,
+                created_at=datetime.now().isoformat(timespec="seconds")
+            )
+        )
+
+        st.session_state.current_chat_conversation.updated_at = datetime.now().isoformat(timespec="seconds")
 
         st.rerun()
+
+def format_message_time(created_at):
+    if not created_at:
+        return ""
+
+    return datetime.fromisoformat(created_at).strftime("%H:%M")

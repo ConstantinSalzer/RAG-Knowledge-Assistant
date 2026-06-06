@@ -5,6 +5,8 @@ def load_chat_styles():
     st.markdown("""
         <style>
         
+        /* -----STYLING AUFBAU CHAT SEITE----- */
+                                
         /* block-Klasse ist die übergeordnete Klasse für alle Blöcke auf einer Seite. Es handelt sich
         um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorghen dafür,
         dass der Inhalt direkt ganz oben beginnt und die maximale Breite begrenzt wird. */
@@ -31,7 +33,7 @@ def load_chat_styles():
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
         }
-
+                
         .st-key-chat_conversation_container {
             height: calc(100vh - 19rem);
             max-height: calc(100vh - 19rem);
@@ -41,41 +43,85 @@ def load_chat_styles():
         }
                 
         .st-key-chat_input_container {
+        }
+                
 
+        /* -----STYLING TEIL USER MESSAGES----- */        
+                                                      
+        div[class*="st-key-user_message_container_"] {
+            max-width: 70%;
+            margin-left: auto;
+            margin-bottom: 0.75rem;
         }
-                                
-        /* Chat User Box Settings */
-        .chat-user-box {
-            display: flex;
-            justify-content: flex-end;
-            margin-bottom: 10px;
-        }
-        
-        /* Chat User Bubble Styling */
-        .chat-user-bubble {
-            background-color: #007bff;
-            color: white;
+
+        div[class*="st-key-user_message_container_"] .chat-user-bubble {
+            background-color: #f4f4f4;
+            color: #111111;
             padding: 10px 15px;
             border-radius: 20px;
-            max-width: 60%;
+            width: fit-content;
+            max-width: 100%;
+            margin-left: auto;
         }
+
+        /* Button selbst */
+        div[class*="st-key-user_message_container_"] button {
+            min-height: 0;
+            height: 1.35rem;
+            padding: 0.05rem 0.35rem;
+            font-size: 0.7rem;
+            border: none;
+            background-color: transparent;
+            color: #666666;
+        }
+
+                
+        /* -----STYLING TEIL ASSISTANT MESSAGES----- */                 
 
         /* Chat Assistant Box Settings */
         .chat-assistant-box {
             display: flex;
             justify-content: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 1.25rem;
         }
 
         /* Chat Assistant Bubble Styling */
         .chat-assistant-bubble {
-            background-color: #F1F0F0;
-            color: black;
-            padding: 10px 15px;
-            border-radius: 20px;
-            max-width: 60%;
+            background-color: transparent;
+            color: #111111;
+            padding: 0;
+            border-radius: 0;
+            max-width: 80%;
+            line-height: 1.6;
+        } 
+
+        /* Chat Chunk Box Settings als Container für Expander*/
+        div[class*="st-key-chat_chunk_container_"] {
+            background-color: #f7f8fa;
+            border: 1px solid #e2e4e8;
+            border-radius: 12px;
+                
+            max-width: 75%;
+            margin-right: auto;
+            margin-bottom: 0.5rem;
+        }   
+
+        div[class*="st-key-assistant_actions_container_"] {
+            max-width: 75%;
+            margin-right: auto;
+            margin-bottom: 1rem;
         }
-                        
+
+        div[class*="st-key-assistant_actions_container_"] button {
+            min-height: 0;
+            height: 1.35rem;
+            padding: 0.05rem 0.35rem;
+            font-size: 0.7rem;
+            border: none;
+            background-color: transparent;
+            color: #666666;
+        }  
+                                 
         </style>
         """,
         unsafe_allow_html=True
