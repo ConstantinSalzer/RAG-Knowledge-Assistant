@@ -17,35 +17,31 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: rag_ollama
-    healthcheck:
-      # Native check: uses the ollama CLI to verify the server is responding
-      test: ["CMD", "ollama", "list"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     volumes:
       - ollama_storage:/root/.ollama
     ports:
       - "11434:11434"
-
-  ollama-pull-models:
-    # Use the same image to ensure the 'ollama' CLI is available
-    image: ollama/ollama:latest
-    container_name: ollama_pull_models
-    depends_on:
-      ollama:
-        condition: service_healthy
-    entrypoint: /bin/sh
+    entrypoint: ["/bin/sh", "-c"]
     command:
-      - "-c"
       - |
+        # 1. Start Ollama in the background
+        ollama serve &
+        
+        # 2. Wait for the server to be ready
+        echo "Waiting for Ollama to start..."
+        until ollama list > /dev/null 2>&1; do
+          sleep 2
+        done
+        
+        # 3. Pull the models
         echo "Pulling models..."
-        export OLLAMA_HOST=http://ollama:11434
-        /usr/bin/ollama pull nomic-embed-text
-        /usr/bin/ollama pull qwen2.5:1.5b
-        /usr/bin/ollama pull qwen2.5:7b
+        ollama pull nomic-embed-text
+        ollama pull qwen2.5:1.5b
+        ollama pull qwen2.5:7b
         echo "All models downloaded."
+        
+        # 4. Bring the background process to the foreground to keep the container running
+        wait $!
         
   # --- RAG Services ---
   retrieval:
@@ -76,8 +72,6 @@ services:
     env_file: .env
     depends_on:
       - ollama
-    volumes:
-      - ./services/augmentation:/app/services/augmentation
 
   generation:
     build:
