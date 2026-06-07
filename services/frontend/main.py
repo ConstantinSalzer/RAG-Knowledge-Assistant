@@ -1,6 +1,6 @@
 import streamlit as st
-from components.sidebar import render_sidebar
-from components.styles import load_sidebar_styles
+from ui.sidebar import render_sidebar
+from ui.css_styling import load_sidebar_styles
 
 
 st.set_page_config(

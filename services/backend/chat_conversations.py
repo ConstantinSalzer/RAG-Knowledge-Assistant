@@ -18,4 +18,8 @@ def save_chat_conversation(chat_conversation: ChatConversation) -> None:
 
 
 def get_chat_conversations() -> list[ChatConversation]:
-    return list(chat_conversations.values())
+    return sorted(
+        chat_conversations.values(),
+        key=lambda conversation: conversation.updated_at,
+        reverse=True
+    )

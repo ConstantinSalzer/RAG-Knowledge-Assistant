@@ -1,8 +1,36 @@
 import streamlit as st
 from pathlib import Path
 
-from services.frontend_actions import save_current_chat, start_new_chat
-from views.pages import views
+from services.backend_client import BackendClient
+from services.frontend_actions import save_current_chat, start_new_chat, load_chat_conversation
+
+from views import chat
+from views import history
+from views import documents
+from views import statistics
+
+views = {
+    chat.PAGE_KEY: {
+        "label": chat.PAGE_NAME,
+        "icon": chat.PAGE_ICON,
+        "render": chat.render_chat,
+    },
+    history.PAGE_KEY: {
+        "label": history.PAGE_NAME,
+        "icon": history.PAGE_ICON,
+        "render": history.render_history,
+    },
+    documents.PAGE_KEY: {
+        "label": documents.PAGE_NAME,
+        "icon": documents.PAGE_ICON,
+        "render": documents.render_documents,
+    },
+    statistics.PAGE_KEY: {
+        "label": statistics.PAGE_NAME,
+        "icon": statistics.PAGE_ICON,
+        "render": statistics.render_statistics,
+    },
+}
 
 def render_sidebar():
     
@@ -33,7 +61,7 @@ def render_sidebar_header():
     LOGO_SIZE = 48
 
     #Legt zwei Spalten an (links Logo, rechts Titel)
-    col_logo, col_title = st.columns([1.5, 4])
+    col_logo, col_title = st.columns([1.5, 5])
 
     # Zeigt das Logo da, sofern die Datei existiert, 
     # Der Fallback verhindert Fehler bei fehlendem Bild (-> Anzeige leerer String)
@@ -115,20 +143,24 @@ def render_sidebar_actions():
 
 
 def render_sidebar_chat_history():
+    backend_client = BackendClient()
+    recent_chats = backend_client.get_chat_conversations()[:10]
 
-    recent_chats = [
-        "Erstletzter Chat",
-        "Zweitletzter Chat",
-        "Drittletzter Chat",
-        "Viertletzter Chat",
-        "Fünftletzter Chat"
-    ]
-
-    for index, chat_title in enumerate(recent_chats):
+    for chat_conversation in recent_chats:
+        conversation_id = chat_conversation["id"]
+        chat_title = format_sidebar_chat_title(chat_conversation["title"])
 
         if st.button(
             f"💬 {chat_title}",
-            key=f"recent_chat_{index}",
+            key=f"recent_chat_{conversation_id}",
             use_container_width=True
         ):
-            st.toast(f"{chat_title} geöffnet (Dummy)")
+            load_chat_conversation(chat_conversation)
+            st.rerun()
+
+
+def format_sidebar_chat_title(title, max_length=18):
+    if len(title) <= max_length:
+        return title
+
+    return title[:max_length] + "..."

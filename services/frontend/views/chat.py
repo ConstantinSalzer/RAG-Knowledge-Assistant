@@ -1,7 +1,13 @@
 import streamlit as st
 from datetime import datetime
-from components.render import render_assistant_actions, render_user_message, render_assistant_message, render_chunk_message, render_chat_settings_panel
-from components.styles import load_chat_styles
+from ui.render_functions import (
+    render_assistant_actions,
+    render_user_message,
+    render_assistant_message,
+    render_chunk_message,
+    render_chat_settings_panel,
+)
+from ui.css_styling import load_chat_styles
 from schemas import ChatConversation, ChatMessage, ChatSettings
 from services.backend_client import BackendClient
 from services.frontend_actions import create_conversation_title_from_message
@@ -72,13 +78,16 @@ def render_conversation():
         elif message.role == "assistant":
             render_assistant_message(message.content)
 
-            for chunk_index, chunk in enumerate(message.chunks or []):
-                render_chunk_message(chunk, message_index, chunk_index)
-
-            render_assistant_actions(
+            show_sources = render_assistant_actions(
                 message_index,
-                format_message_time(message.created_at)
+                format_message_time(message.created_at),
+                message.content,
+                has_chunks=bool(message.chunks)
             )
+
+            if show_sources:
+                for chunk_index, chunk in enumerate(message.chunks or []):
+                    render_chunk_message(chunk, message_index, chunk_index)
 
             
 # Handhabt die Benutzereingabe, indem sie die Nachricht des Benutzers zum Session State hinzufügt, eine KI-Antwort generiert 
@@ -121,6 +130,10 @@ def handle_user_input():
         )
 
         st.session_state.current_chat_conversation.updated_at = datetime.now().isoformat(timespec="seconds")
+
+        backend_client.save_chat_conversation(
+            st.session_state.current_chat_conversation
+        )
 
         st.rerun()
 

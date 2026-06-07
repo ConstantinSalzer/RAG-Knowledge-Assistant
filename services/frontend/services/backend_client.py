@@ -24,6 +24,7 @@ class BackendClient:
             }
         )
 
+        response.raise_for_status()
         return response.json()
     
     # Erhält gespeicherte Chat-Konversationen aus dem Backend
@@ -33,6 +34,7 @@ class BackendClient:
             f"{self.base_url}/chat-conversations"
         )
 
+        response.raise_for_status()
         return response.json()
     
     # Speichert eine Konversation und gibt diese ans Backend weiter
