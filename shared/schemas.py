@@ -40,11 +40,11 @@ class ChatConversation(BaseModel):
 
 class ChatSettings(BaseModel):
     top_k: int = 5
-    llm: str = "GPT-4"
-    prompting_strategy: str = "Standard RAG"
+    llm: str = "Lokal"
+    prompting_strategy: str = "Kreativ"
 
     MIN_TOP_K: ClassVar[int] = 1
-    MAX_TOP_K: ClassVar[int] = 20
+    MAX_TOP_K: ClassVar[int] = 10
 
-    LLM_OPTIONS: ClassVar[list[str]] = ["GPT-4", "Llama 3", "Mistral"]
-    PROMPT_STRATEGIES: ClassVar[list[str]] = ["Standard RAG", "Chain of Thought", "Concise"]
+    LLM_OPTIONS: ClassVar[list[str]] = ["Lokal", "API"]
+    PROMPT_STRATEGIES: ClassVar[list[str]] = ["Technisch", "Kreativ", "Defensiv"]

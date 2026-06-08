@@ -93,6 +93,7 @@ def load_chat_styles():
             border-radius: 0;
             max-width: 80%;
             line-height: 1.6;
+            white-space: pre-wrap;
         } 
 
         /* Chat Chunk Box Settings als Container für Expander*/
@@ -284,6 +285,7 @@ def load_history_styles():
             border-radius: 0;
             max-width: 80%;
             line-height: 1.6;
+            white-space: pre-wrap;
         }
                         
         </style>

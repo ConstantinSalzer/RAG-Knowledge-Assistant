@@ -19,13 +19,13 @@ def chat(request: ChatRequest):
     settings = request.chat_settings
 
     ai_response = (
-        f"Backend received: {user_message}<br><br>"
-        f"Current Chat Settings:<br>"
-        f"top_k = {settings.top_k}<br>"
-        f"llm = {settings.llm}<br>"
-        f"prompting_strategy = {settings.prompting_strategy}<br>"
+        f"Backend received: {user_message}\n\n"
+        f"Current Chat Settings:\n"
+        f"top_k = {settings.top_k}\n"
+        f"llm = {settings.llm}\n"
+        f"prompting_strategy = {settings.prompting_strategy}\n"
     )
-
+    
     sorted_chunks = sorted(example_chunks, key=lambda c: c.confidence_score, reverse=True)
     top_k_chunks = sorted_chunks[:request.chat_settings.top_k]
 

@@ -1,4 +1,7 @@
 import streamlit as st
+import html
+
+from services.frontend_actions import copy_to_clipboard_button
 
 # RENDER-FUNKTIONEN FÜR DIE VIEW "AKTUELLER CHAT"
 
@@ -20,19 +23,23 @@ def render_user_message(message_content, message_index, message_time):
             st.caption(message_time)
 
         with button_col:
-            if st.button("⧉", key=f"copy_user_message_{message_index}"):
-                st.session_state.copied_user_message = message_content
-                st.toast("Nachricht kopiert")
+            copy_to_clipboard_button(
+                message_content,
+                "⧉",
+                f"copy_user_message_{message_index}"
+            )
+            
 
 def render_assistant_message(message_content):
+    message_content = message_content.strip()
+    safe_content = html.escape(message_content).replace("\n", "<br>")
 
     st.markdown(
         f"""
         <div class='chat-assistant-box'>
-            <div class='chat-assistant-bubble'>
-                {message_content}
-            </div>
-        </div>""",
+            <div class='chat-assistant-bubble'>{safe_content}</div>
+        </div>
+        """,
         unsafe_allow_html=True
     )
 
@@ -62,9 +69,11 @@ def render_assistant_actions(message_index, message_time, message_content, has_c
             st.caption(message_time)
         
         with copy_col:
-            if st.button("⧉", key=f"copy_assistant_message_{message_index}"):
-                st.session_state.copied_assistant_message = message_content
-                st.toast("Nachricht kopiert")
+            copy_to_clipboard_button(
+                message_content,
+                "⧉",
+                f"copy_assistant_message_{message_index}"
+            )
 
         with thumbs_up_col:
             if st.button("👍", key=f"thumbs_up_assistant_message_{message_index}"):
@@ -86,12 +95,12 @@ def render_assistant_actions(message_index, message_time, message_content, has_c
 
 def render_chat_settings_panel():
 
-    st.subheader("Chat Settings")
+    st.subheader("Chat Einstellungen")
 
     chat_settings = st.session_state.chat_settings
 
     top_k = st.slider(
-        "Top-K Chunks",
+        "Anzahl an Chunks",
         chat_settings.MIN_TOP_K,
         chat_settings.MAX_TOP_K,
         value=chat_settings.top_k,
@@ -99,21 +108,21 @@ def render_chat_settings_panel():
     )
 
     selected_llm = st.selectbox(
-        "LLM",
+        "Ausführungsmodus LLM",
         chat_settings.LLM_OPTIONS,
         index=chat_settings.LLM_OPTIONS.index(chat_settings.llm),
         key="chat_settings_llm"
     )
 
     prompting_strategy = st.selectbox(
-        "Prompting Strategy",
+        "Prompting Stil",
         chat_settings.PROMPT_STRATEGIES,
         index=chat_settings.PROMPT_STRATEGIES.index(chat_settings.prompting_strategy),
         key="chat_settings_prompting_strategy"
     )
 
     if st.button(
-        "Apply Settings",
+        "Einstellungen anwenden",
         use_container_width=True,
         type="primary"
     ):
@@ -122,7 +131,7 @@ def render_chat_settings_panel():
         chat_settings.llm = selected_llm
         chat_settings.prompting_strategy = prompting_strategy
 
-        st.success("Settings applied!")
+        st.success("Einstellungen angewendet!")
     
 
 # RENDER-FUNKTIONEN FÜR DIE VIEW "CHAT HISTORY"
@@ -153,12 +162,13 @@ def render_chat_history_preview(conversation):
                     )
 
             elif role == "assistant":
+                content = content.strip()
+                safe_content = html.escape(content).replace("\n", "<br>")
+
                 st.markdown(
                     f"""
                     <div class='chat-assistant-box'>
-                        <div class='chat-assistant-bubble'>
-                            {content}
-                        </div>
+                        <div class='chat-assistant-bubble'>{safe_content}</div>
                     </div>
                     """,
                     unsafe_allow_html=True
