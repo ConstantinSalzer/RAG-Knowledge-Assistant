@@ -16,6 +16,7 @@ resolution-markers = [
 [manifest]
 members = [
     "augmentation",
+    "backend",
     "frontend",
     "generation",
     "ingestion",
@@ -218,16 +219,33 @@ name = "augmentation"
 version = "0.1.0"
 source = { editable = "services/augmentation" }
 dependencies = [
-    { name = "langchain" },
-    { name = "openai" },
+    { name = "requests" },
     { name = "shared" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "langchain" },
-    { name = "openai" },
+    { name = "requests" },
     { name = "shared", editable = "shared" },
+]
+
+[[package]]
+name = "backend"
+version = "0.1.0"
+source = { virtual = "services/backend" }
+dependencies = [
+    { name = "fastapi" },
+    { name = "pydantic" },
+    { name = "shared" },
+    { name = "uvicorn" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi" },
+    { name = "pydantic" },
+    { name = "shared", editable = "shared" },
+    { name = "uvicorn" },
 ]
 
 [[package]]
@@ -471,11 +489,19 @@ name = "frontend"
 version = "0.1.0"
 source = { editable = "services/frontend" }
 dependencies = [
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "shared" },
     { name = "streamlit" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "streamlit" }]
+requires-dist = [
+    { name = "pydantic" },
+    { name = "requests" },
+    { name = "shared", editable = "shared" },
+    { name = "streamlit" },
+]
 
 [[package]]
 name = "frozenlist"

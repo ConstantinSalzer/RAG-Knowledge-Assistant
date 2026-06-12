@@ -1,0 +1,27 @@
+<svg width="760" height="760" viewBox="250 240 760 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="dark" x1="340" y1="300" x2="905" y2="925" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#202832"/>
+      <stop offset="1" stop-color="#151B22"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="555" y1="500" x2="710" y2="724" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00AEB6"/>
+      <stop offset="1" stop-color="#008F96"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="655" y1="507" x2="716" y2="586" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00B7BF"/>
+      <stop offset="1" stop-color="#008B92"/>
+    </linearGradient>
+  </defs>
+
+  <path
+    d="M625 332C464.8 332 335 461.8 335 622C335 782.2 464.8 912 625 912C668.9 912 710.5 902.2 747.9 884.7L879.5 926.2C893.1 930.5 906 918.3 902.4 904.5L870.3 782.3C894.7 738.3 909 683.9 909 622C909 461.8 779.2 332 625 332ZM625 403C746 403 844 501 844 622C844 664.6 831.8 704.4 810.8 738L798.6 757.4L814.4 817.6L748.9 797L729.2 806.6C697.8 822 662.4 831 625 831C504 831 406 733 406 622C406 501 504 403 625 403Z"
+    fill="url(#dark)"
+  />
+
+  <path d="M567 499H656V554C656 578 676 598 700 598H732V715C732 734 717 749 698 749H567C548 749 533 734 533 715V533C533 514 548 499 567 499Z" fill="url(#teal)"/>
+  <path d="M675 509L727 562H699C686 562 675 551 675 538V509Z" fill="url(#fold)"/>
+  <path d="M665 503V553C665 579 686 600 712 600H733" stroke="white" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M586 628H680" stroke="white" stroke-width="15" stroke-linecap="round"/>
+  <path d="M586 670H680" stroke="white" stroke-width="15" stroke-linecap="round"/>
+</svg>
