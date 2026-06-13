@@ -83,7 +83,6 @@ def render_user_message(message_content, message_index, message_time):
         with button_col:
             copy_to_clipboard_button(
                 message_content,
-                "⧉",
                 f"copy_user_message_{message_index}"
             )
             
@@ -130,7 +129,6 @@ def render_assistant_actions(message_index, message_time, message_content, has_c
         with copy_col:
             copy_to_clipboard_button(
                 message_content,
-                "⧉",
                 f"copy_assistant_message_{message_index}"
             )
 

@@ -46,7 +46,7 @@ def create_conversation_title_from_message(message: str, max_length: int = 50) -
 
 
 # Copy to Clipboard Button mit KI erstellt
-def copy_to_clipboard_button(text: str, button_label: str, key: str):
+def copy_to_clipboard_button(text: str, key: str):
     escaped_text = json.dumps(text)
 
     components.html(
