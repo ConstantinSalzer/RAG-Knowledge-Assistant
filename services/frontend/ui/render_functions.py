@@ -3,6 +3,64 @@ import html
 
 from services.frontend_actions import copy_to_clipboard_button
 
+
+# ALLGEMEINE RENDER-FUNKTIONEN
+
+def render_section_header(title):
+
+    st.markdown(
+        f"""
+        <div class="section-header">
+            <div class="section-title">{title}</div>
+            <div class="section-line"></div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def render_list_item(
+    item_label,
+    item_key,
+    action_label,
+    action_disabled=False,
+    action_url=None
+):
+
+    with st.container(key=f"list_item_container_{item_key}"):
+
+        item_col, action_col = st.columns([10, 1.6])
+
+        with item_col:
+            with st.container(key=f"list_item_toggle_container_{item_key}"):
+                toggle_clicked = st.button(
+                    item_label,
+                    key=f"toggle_list_item_{item_key}",
+                    use_container_width=True
+                )
+
+        with action_col:
+            with st.container(key=f"list_item_action_container_{item_key}"):
+
+                if action_url:
+                    st.link_button(
+                        action_label,
+                        action_url,
+                        use_container_width=True
+                    )
+                    action_clicked = False
+
+                else:
+                    action_clicked = st.button(
+                        action_label,
+                        key=f"action_list_item_{item_key}",
+                        use_container_width=True,
+                        disabled=action_disabled
+                    )
+
+    return toggle_clicked, action_clicked
+
+
 # RENDER-FUNKTIONEN FÜR DIE VIEW "AKTUELLER CHAT"
 
 def render_user_message(message_content, message_index, message_time):
@@ -54,6 +112,7 @@ def render_chunk_message(chunk, message_index, chunk_index):
     with st.container(key=f"chat_chunk_container_{message_index}_{chunk_index}"):
         with st.expander(title, expanded=False):
             st.write(content)
+
 
 def render_assistant_actions(message_index, message_time, message_content, has_chunks=False):
     sources_key = f"show_sources_assistant_message_{message_index}"
@@ -131,45 +190,4 @@ def render_chat_settings_panel():
         chat_settings.llm = selected_llm
         chat_settings.prompting_strategy = prompting_strategy
 
-        st.success("Einstellungen angewendet!")
-    
-
-# RENDER-FUNKTIONEN FÜR DIE VIEW "CHAT HISTORY"
-
-# Rendert die Vorschau einer Konversation. Orientiert sich dabei am Schema aus "aktueller Chat"
-def render_chat_history_preview(conversation):
-    messages = conversation.get("messages", [])
-    conversation_id = conversation["id"]
-
-    if not messages:
-        st.caption("Keine Nachrichten vorhanden.")
-        return
-
-    with st.container(key=f"history_preview_container_{conversation_id}"):
-        for message_index, message in enumerate(messages):
-            role = message.get("role", "")
-            content = message.get("content", "")
-
-            if role == "user":
-                with st.container(key=f"history_user_message_container_{conversation_id}_{message_index}"):
-                    st.markdown(
-                        f"""
-                        <div class='chat-user-bubble'>
-                            {content}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-            elif role == "assistant":
-                content = content.strip()
-                safe_content = html.escape(content).replace("\n", "<br>")
-
-                st.markdown(
-                    f"""
-                    <div class='chat-assistant-box'>
-                        <div class='chat-assistant-bubble'>{safe_content}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        st.rerun()

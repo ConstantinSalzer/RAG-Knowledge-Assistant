@@ -236,6 +236,7 @@ source = { virtual = "services/backend" }
 dependencies = [
     { name = "fastapi" },
     { name = "pydantic" },
+    { name = "python-multipart" },
     { name = "shared" },
     { name = "uvicorn" },
 ]
@@ -244,6 +245,7 @@ dependencies = [
 requires-dist = [
     { name = "fastapi" },
     { name = "pydantic" },
+    { name = "python-multipart" },
     { name = "shared", editable = "shared" },
     { name = "uvicorn" },
 ]

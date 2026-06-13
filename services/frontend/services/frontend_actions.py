@@ -1,8 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import json
-import re
-import html
 
 from schemas import ChatConversation
 from services.backend_client import BackendClient
@@ -23,6 +21,7 @@ def save_current_chat():
 
 def start_new_chat():
     st.session_state.current_chat_conversation = ChatConversation.create_new()
+    st.session_state.selected_page = "chat"
 
 
 def load_chat_conversation(chat_conversation):
@@ -106,3 +105,19 @@ def copy_to_clipboard_button(text: str, button_label: str, key: str):
         """,
         height=22,
     )
+
+
+# Übergibt die in der Dokumentenview hochgeladenen Dokumente an den Backend-Client zum Upload an das Backend
+def upload_documents(uploaded_files):
+
+    backend_client = BackendClient()
+
+    try:
+        with st.spinner("Dokumente werden hochgeladen..."):
+            result = backend_client.upload_documents(uploaded_files)
+
+    except Exception as error:
+        st.error(f"Upload fehlgeschlagen: {error}")
+        return None
+
+    return result

@@ -5,6 +5,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "pydantic",
+    "python-multipart",
     "shared",
 ]
 

@@ -1,6 +1,6 @@
 import streamlit as st
 from ui.sidebar import render_sidebar
-from ui.css_styling import load_sidebar_styles
+from ui.css_styling import load_global_styles, load_sidebar_styles
 
 
 st.set_page_config(
@@ -9,6 +9,7 @@ st.set_page_config(
     layout="wide"
 )
 
+load_global_styles()
 load_sidebar_styles()
 
 selected_view = render_sidebar()
