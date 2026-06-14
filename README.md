@@ -28,7 +28,7 @@ UI / Richard
 
 Pipeline (RAG) / Phil
 
-    - wait form Michaels Part
+    - wait from Michaels Part
     - no/less hallucinations
     - guardrails (illegal, off topic)
     - off topic switch mid conversation

@@ -119,7 +119,7 @@ def handle_user_input():
         if st.session_state.current_chat_conversation.title == "Neuer Chat":
             st.session_state.current_chat_conversation.title = create_conversation_title_from_message(user_input)
 
-        # Letzte Nachrichten der bisherigen Konversation als Kontext für den Augmentation-Service
+        # Letzte Nachrichten der bisherigen Konversation als Kontext für den Pipeline-Service
         history = st.session_state.current_chat_conversation.messages[-MAX_HISTORY_MESSAGES:]
 
         # User-Nachricht zum Session State hinzufügen
@@ -131,7 +131,7 @@ def handle_user_input():
             )
         )
 
-        # Anfrage an den Augmentation-Service senden
+        # Anfrage an den Pipeline-Service senden
         backend_client = BackendClient()
         response = backend_client.send_chat_message(
             user_input,
@@ -165,7 +165,7 @@ def handle_web_search_confirmation():
     append_assistant_response(backend_client, response)
     st.rerun()
 
-# Fügt die Antwort des Augmentation-Service zum Session State hinzu und speichert die Konversation
+# Fügt die Antwort des Pipeline-Service zum Session State hinzu und speichert die Konversation
 def append_assistant_response(backend_client, response):
 
     st.session_state.current_chat_conversation.messages.append(

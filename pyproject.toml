@@ -4,12 +4,10 @@ package = false
 
 [tool.uv.workspace]
 members = [
-    "services/augmentation",
+    "services/pipeline",
     "services/backend",
     "services/frontend",
     "services/ingestion",
-    "services/retrieval",
-    "services/generation",
     "shared",
 ]
 

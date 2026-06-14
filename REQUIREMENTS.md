@@ -20,7 +20,7 @@ Status column is intentionally left for tracking: `[ ]` open · `[x]` done · `[
 | 1.6 | Metadata tagging | Each chunk stores `source` (filename), `page` number, and `title` | `[ ]` |
 
 > **Current state:** `ingestion` service is a stub (`worker.py` heartbeat loop). `Chunk` schema in
-> `shared/schemas.py` exists; `get_mock_chunks()` in `augmentation` is the placeholder.
+> `shared/schemas.py` exists; `get_mock_chunks()` in `pipeline` is the placeholder.
 
 ---
 
@@ -32,10 +32,11 @@ Status column is intentionally left for tracking: `[ ]` open · `[x]` done · `[
 | 2.2 | Vector storage | Embeddings are persisted in `pgvector` (`rag_postgres`) | `[ ]` |
 | 2.3 | Metadata persistence | Chunk metadata (source, page, title) is stored alongside vectors | `[ ]` |
 | 2.4 | Semantic search | Given a query, the top-N most similar chunks are returned via cosine similarity | `[ ]` |
-| 2.5 | Replace mock chunks | `get_mock_chunks()` is replaced by a real DB lookup in `augmentation` | `[ ]` |
+| 2.5 | Replace mock chunks | `get_mock_chunks()` is replaced by a real DB lookup in `pipeline` | `[ ]` |
 
-> **Current state:** `retrieval` service is a stub. `pgvector` is initialized via `infra/postgres/init.sql`
-> but no vectors are being written or queried yet.
+> **Current state:** retrieval is not yet implemented — `get_mock_chunks()` in `pipeline` returns
+> placeholder data. `pgvector` is initialized via `infra/postgres/init.sql` but no vectors are being
+> written or queried yet. Real retrieval logic will live inside `pipeline`, not a separate service.
 
 ---
 
@@ -78,7 +79,7 @@ Status column is intentionally left for tracking: `[ ]` open · `[x]` done · `[
 | 5.5 | Docker-network routing | `BackendClient` targets service hostname (not `127.0.0.1`) when running in compose | `[ ]` |
 
 > **Current state:** `BackendClient` hardcodes `http://127.0.0.1:8000` — breaks inside Docker compose
-> network. Must be changed to `http://augmentation:8000` (or env-variable driven).
+> network. Must be changed to `http://pipeline:8000` (or env-variable driven).
 
 ---
 
@@ -93,7 +94,8 @@ Status column is intentionally left for tracking: `[ ]` open · `[x]` done · `[
 | 6.5 | Chunk size comparison | (Optional) Evaluation across at least two chunk sizes | `[ ]` |
 | 6.6 | Prompt strategy comparison | (Optional) Evaluation across at least two prompt roles/strategies | `[ ]` |
 
-> `generation/pyproject.toml` lists `ragas` as a future dep — suitable for 6.1–6.2.
+> No separate `generation` service exists anymore — `ragas`/`langgraph`/`tavily-python` would need
+> to be added to `services/pipeline/pyproject.toml` if pursued for 6.1–6.2.
 
 ---
 
@@ -117,8 +119,10 @@ These services exist as heartbeat stubs and must be fully implemented:
 | Service | Current state | Required |
 |---------|--------------|---------|
 | `ingestion` | `worker.py` loop | Implement document parsing, chunking, metadata tagging, embedding write to pgvector |
-| `retrieval` | `main.py` loop | Implement vector similarity search against pgvector; replace `get_mock_chunks()` |
-| `generation` | `agent.py` loop | (Optional) LangGraph-based agentic generation; `ragas` evaluation harness |
+
+> Retrieval (vector similarity search, replacing `get_mock_chunks()`) and generation enhancements
+> (e.g. LangGraph-based agentic generation, `ragas` evaluation) are no longer separate stub services —
+> they're tracked as work items within `pipeline` under sections 2, 3, and 6 above.
 
 ---
 
@@ -131,7 +135,7 @@ Run these manually (or automate) to verify core functionality end-to-end:
 docker compose up -d --build
 docker compose ps   # all services "Up"
 
-# 2. Augmentation API responds
+# 2. Pipeline API responds
 curl -s http://localhost:8000/augment \
   -H "Content-Type: application/json" \
   -d '{"query":"Was ist RAG?","settings":{"role":"technical","mode":"fast","provider":"local","max_tokens":512,"threshold":0.5}}' \

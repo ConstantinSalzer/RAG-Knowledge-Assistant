@@ -9,11 +9,11 @@ WORKDIR /app
 COPY . .
 
 # install dependencies
-RUN uv pip install --system ./shared ./services/augmentation
+RUN uv pip install --system ./shared ./services/pipeline
 
 # set environment variable for python path and workdir for the service
-ENV PYTHONPATH=/app/services/augmentation
-WORKDIR /app/services/augmentation
+ENV PYTHONPATH=/app/services/pipeline
+WORKDIR /app/services/pipeline
 
 # run the service
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

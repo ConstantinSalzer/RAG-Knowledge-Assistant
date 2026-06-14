@@ -18,15 +18,6 @@ services:
   # Containers reach it via OLLAMA_URL=http://host.docker.internal:11435 (set in .env).
 
   # --- RAG Services ---
-  retrieval:
-    build:
-      context: .
-      dockerfile: services/retrieval/Dockerfile
-    container_name: rag_retrieval
-    env_file: .env
-    depends_on:
-      - postgres
-
   ingestion:
     build:
       context: .
@@ -36,19 +27,19 @@ services:
     depends_on:
       - postgres
 
-  augmentation:
+  pipeline:
     build:
       context: .
-      dockerfile: services/augmentation/Dockerfile
-    container_name: rag_augmentation
+      dockerfile: services/pipeline/Dockerfile
+    container_name: rag_pipeline
     volumes:
-      - ./services/augmentation:/app/services/augmentation
+      - ./services/pipeline:/app/services/pipeline
       - ./shared:/app/shared
     ports:
       - "8000:8000"
     env_file: .env
     environment:
-      - PYTHONPATH=/app/services/augmentation
+      - PYTHONPATH=/app/services/pipeline
 
   backend:
     build:
@@ -61,13 +52,6 @@ services:
     depends_on:
       - postgres
 
-  generation:
-    build:
-      context: .
-      dockerfile: services/generation/Dockerfile
-    container_name: rag_generation
-    env_file: .env
-
   frontend:
     build:
       context: .
@@ -77,11 +61,10 @@ services:
       - "8501:8501"
     env_file: .env
     environment:
-      - AUGMENTATION_URL=http://rag_augmentation:8000
+      - PIPELINE_URL=http://rag_pipeline:8000
       - BACKEND_URL=http://rag_backend:8000
     depends_on:
-      - retrieval
-      - augmentation
+      - pipeline
       - backend
 
 # pg_data is handled by your relative bind mount ./data/pg_data

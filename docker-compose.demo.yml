@@ -16,7 +16,7 @@ services:
       - ollama_data:/root/.ollama
 
   # One-shot helper: waits for the ollama server, then pulls all models required by
-  # services/augmentation/app/models.py. Exits once done.
+  # services/pipeline/app/models.py. Exits once done.
   ollama-init:
     image: ollama/ollama:latest
     container_name: rag_ollama_init
@@ -33,7 +33,7 @@ services:
          ollama pull $$m || exit 1;
        done"
 
-  augmentation:
+  pipeline:
     environment:
       - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:

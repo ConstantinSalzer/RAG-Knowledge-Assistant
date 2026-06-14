@@ -6,22 +6,22 @@ import requests
 from shared.schemas import ChatMessage, ChatRequest, ChatResponse, Settings
 
 
-# Zuständige Klasse für die Kommunikation mit Augmentation- und Backend-Service (sauberes Kapseln)
+# Zuständige Klasse für die Kommunikation mit Pipeline- und Backend-Service (sauberes Kapseln)
 class BackendClient:
 
     # Konstruktor, der die Basis-URLs der Services festlegt (per ENV überschreibbar fürs Docker-Netzwerk)
     def __init__(self):
 
-        self.augmentation_url = os.environ.get("AUGMENTATION_URL", "http://127.0.0.1:8000")
+        self.pipeline_url = os.environ.get("PIPELINE_URL", "http://127.0.0.1:8000")
         self.backend_url = os.environ.get("BACKEND_URL", "http://127.0.0.1:8001")
 
-    # Sendet eine Chat-Nachricht des Benutzers (= query) an den Augmentation-Service und liefert die ChatResponse
+    # Sendet eine Chat-Nachricht des Benutzers (= query) an den Pipeline-Service und liefert die ChatResponse
     def send_chat_message(self, query: str, settings: Settings, history: List[ChatMessage] = None, confirm_web_search: bool = False) -> ChatResponse:
 
         request = ChatRequest(query=query, settings=settings, history=history or [], confirm_web_search=confirm_web_search)
 
         response = requests.post(
-            f"{self.augmentation_url}/augment",
+            f"{self.pipeline_url}/augment",
             json=request.model_dump()
         )
 
