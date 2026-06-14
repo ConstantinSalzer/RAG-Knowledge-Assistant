@@ -1,4 +1,4 @@
-from schemas import ChatConversation
+from shared.schemas import ChatConversation
 from services.backend.testdummys import example_chat_conversations
 
 

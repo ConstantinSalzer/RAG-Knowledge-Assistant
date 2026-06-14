@@ -1,0 +1,43 @@
+# Demo override: containerizes Ollama (CPU) so the whole stack runs with one command,
+# without installing Ollama on the host. ~10x slower than native Metal (see CLAUDE.md),
+# but no host setup needed - useful for showing the project on another machine.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.demo.yml up -d --build
+#
+# First run pulls ~9.5GB of models (nomic-embed-text, qwen2.5:1.5b/3b/7b, llama-guard3:1b)
+# into the ollama_data volume - this can take a while depending on connection speed.
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: rag_ollama
+    volumes:
+      - ollama_data:/root/.ollama
+
+  # One-shot helper: waits for the ollama server, then pulls all models required by
+  # services/pipeline/app/models.py. Exits once done.
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: rag_ollama_init
+    depends_on:
+      - ollama
+    environment:
+      - OLLAMA_HOST=ollama:11434
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      "until ollama list >/dev/null 2>&1; do sleep 1; done &&
+       for m in nomic-embed-text qwen2.5:1.5b qwen2.5:3b qwen2.5:7b llama-guard3:1b; do
+         ollama pull $$m || exit 1;
+       done"
+
+  pipeline:
+    environment:
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - ollama-init
+
+volumes:
+  ollama_data:

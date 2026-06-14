@@ -3,7 +3,13 @@ managed = true
 package = false
 
 [tool.uv.workspace]
-members = ["services/*", "shared"]
+members = [
+    "services/pipeline",
+    "services/backend",
+    "services/frontend",
+    "services/ingestion",
+    "shared",
+]
 
 [project]
 name = "rag-uni-project"

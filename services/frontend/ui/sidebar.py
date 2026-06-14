@@ -60,11 +60,10 @@ def render_sidebar_header():
 
     LOGO_SIZE = 48
 
-    #Legt zwei Spalten an (links Logo, rechts Titel)
+    # Zwei Spalten: links Logo, rechts Titel
     col_logo, col_title = st.columns([1.5, 5])
 
-    # Zeigt das Logo da, sofern die Datei existiert, 
-    # Der Fallback verhindert Fehler bei fehlendem Bild (-> Anzeige leerer String)
+    # Fallback verhindert Fehler bei fehlendem Bild
     with col_logo:
         if logo_path.exists():
             st.image(str(logo_path), width=LOGO_SIZE)
@@ -99,7 +98,6 @@ def render_sidebar_navigation():
 
         is_active = st.session_state.selected_page == page_key
 
-    # Der Klammerteile definiert die einzelnen Buttons. Der Teil danach speichert die ausgewählte Seite im Session State
         if st.button(
             f"{page['icon']} {page['label']}",
             key = f"nav_{page_key}",
@@ -114,7 +112,6 @@ def render_sidebar_navigation():
 
 def render_sidebar_actions():
 
-    # Button: Neuer Chat
     if st.button(
         "➕ Neuer Chat",
         key="new_chat",
@@ -125,7 +122,6 @@ def render_sidebar_actions():
         st.toast("Aktueller Chat gespeichert")
         st.rerun()
 
-    # Button: Chat durchsuchen
     if st.button(
         "🔍 Chat durchsuchen",
         key="search_chat",
@@ -133,7 +129,6 @@ def render_sidebar_actions():
     ):
         st.toast("Chat-Suche geöffnet (Dummy)")
 
-    # Button: Dokument hochladen
     if st.button(
         "📄 Dokumente hochladen",
         key="upload_docs",

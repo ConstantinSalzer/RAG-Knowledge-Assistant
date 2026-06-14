@@ -168,22 +168,19 @@ def load_chat_styles():
         /* -----STYLING TEIL ASSISTANT MESSAGES----- */                 
 
         /* Chat Assistant Box Settings */
-        .chat-assistant-box {
+        div[class*="st-key-chat_assistant_box_"] {
             display: flex;
             justify-content: flex-start;
             margin-bottom: 1.25rem;
         }
 
-        /* Chat Assistant Bubble Styling */
-        .chat-assistant-bubble {
-            background-color: transparent;
+        /* Chat Assistant Bubble Styling (Markdown-Inhalt) */
+        div[class*="st-key-chat_assistant_box_"] [data-testid="stMarkdownContainer"] {
             color: #111111;
-            padding: 0;
-            border-radius: 0;
             max-width: 80%;
             line-height: 1.6;
             white-space: pre-wrap;
-        } 
+        }
 
         /* Chat Chunk Box Settings als Container für Expander*/
         div[class*="st-key-chat_chunk_container_"] {
@@ -293,17 +290,14 @@ def load_history_styles():
             margin-left: auto;
         }
 
-        div[class*="st-key-history_preview_container_"] .chat-assistant-box {
+        div[class*="st-key-history_preview_container_"] div[class*="st-key-history_assistant_box_"] {
             display: flex;
             justify-content: flex-start;
             margin-bottom: 1.25rem;
         }
 
-        div[class*="st-key-history_preview_container_"] .chat-assistant-bubble {
-            background-color: transparent;
+        div[class*="st-key-history_preview_container_"] div[class*="st-key-history_assistant_box_"] [data-testid="stMarkdownContainer"] {
             color: #111111;
-            padding: 0;
-            border-radius: 0;
             max-width: 80%;
             line-height: 1.6;
             white-space: pre-wrap;
@@ -385,8 +379,7 @@ def load_documents_styles():
 
 def load_sidebar_styles():
 
-    # Mit markdown wird ein Style-Tag in die Seite eingebettet, der die Breite der Sidebar anpasst.
-    # Die Sidebar selbst besteht aus mehreren "HTML-Elementen", die alle angepasst werden müssen (daher die zwei Selektoren).
+    # Passt die Sidebar-Breite an; zwei Selektoren, da sie aus mehreren HTML-Elementen besteht
     st.markdown(
         """
         <style>

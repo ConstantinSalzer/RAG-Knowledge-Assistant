@@ -1,8 +1,6 @@
 import streamlit as st
-import html
 
 from services.frontend_actions import copy_to_clipboard_button
-from schemas import ChatSettings
 
 
 # ALLGEMEINE RENDER-FUNKTIONEN
@@ -76,45 +74,44 @@ def render_user_message(message_content, message_index, message_time):
             unsafe_allow_html=True
         )
 
-        spacer_col, time_col, button_col = st.columns([7, 1, 1])
+        spacer_col, time_col, copy_col, rerun_col = st.columns([6, 1, 1, 1])
 
         with time_col:
             st.caption(message_time)
 
-        with button_col:
+        with copy_col:
             copy_to_clipboard_button(
                 message_content,
                 f"copy_user_message_{message_index}"
             )
-            
 
-def render_assistant_message(message_content):
-    message_content = message_content.strip()
-    safe_content = html.escape(message_content).replace("\n", "<br>")
+        with rerun_col:
+            if st.button("↻", key=f"rerun_user_message_{message_index}"):
+                st.session_state.rerun_query = message_content
+                st.rerun()
 
-    st.markdown(
-        f"""
-        <div class='chat-assistant-box'>
-            <div class='chat-assistant-bubble'>{safe_content}</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+def render_assistant_message(message_content, message_index, used_web_search=False):
+
+    with st.container(key=f"chat_assistant_box_{message_index}"):
+        st.markdown(message_content)
+
+        if used_web_search:
+            st.caption("🌐 Diese Antwort basiert auf einer Websuche und nicht auf der Wissensbasis.")
+
+def render_web_search_confirmation(message_index):
+
+    with st.container(key=f"web_search_confirmation_container_{message_index}"):
+        return st.button("🌐 Im Web suchen", key=f"confirm_web_search_{message_index}")
 
 def render_chunk_message(chunk, message_index, chunk_index):
     file_name = chunk.file_name
     author = chunk.author
     confidence_score = chunk.confidence_score
-    content = chunk.content
-
-    title = f"{file_name} | {author} | Score: {confidence_score}"
 
     with st.container(key=f"chat_chunk_container_{message_index}_{chunk_index}"):
-        with st.expander(title, expanded=False):
-            st.write(content)
+        st.caption(f"{file_name} | {author} | Score: {confidence_score}")
 
-
-def render_assistant_actions(message_index, message_time, message_content, has_chunks=False):
+def render_assistant_actions(message_index, message_time, message_content, has_chunks=False, tokens_used=0):
     sources_key = f"show_sources_assistant_message_{message_index}"
 
     if sources_key not in st.session_state:
@@ -125,8 +122,8 @@ def render_assistant_actions(message_index, message_time, message_content, has_c
         time_col, copy_col, thumbs_up_col, thumbs_down_col, sources_col, spacer_col = st.columns([1.3, 1, 1, 1, 2.4, 6.6])
 
         with time_col:
-            st.caption(message_time)
-        
+            st.caption(f"{message_time} · {tokens_used} Tokens" if tokens_used else message_time)
+
         with copy_col:
             copy_to_clipboard_button(
                 message_content,
@@ -157,45 +154,91 @@ def render_chat_settings_panel():
 
     chat_settings = st.session_state.chat_settings
 
-    top_k = st.slider(
-        "Anzahl an Chunks",
-        min_value=ChatSettings.MIN_TOP_K,
-        max_value=ChatSettings.MAX_TOP_K,
-        value=chat_settings.top_k,
-        key="chat_settings_top_k",
+    role_options = ["technical", "creative", "defensive", "concise", "detailed"]
+    provider_options = ["local", "api"]
+    mode_options = ["fast", "complex"]
+
+    role = st.selectbox(
+        "Rolle",
+        role_options,
+        index=role_options.index(chat_settings.role),
+        key="chat_settings_role"
     )
 
-    llm_options = list(ChatSettings.LLM_OPTIONS.keys())
-
-    selected_llm = st.selectbox(
-        "Modell",
-        options=llm_options,
-        index=llm_options.index(chat_settings.llm),
-        format_func=lambda key: ChatSettings.LLM_OPTIONS[key],
-        key="chat_settings_llm",
+    provider = st.selectbox(
+        "Provider",
+        provider_options,
+        index=provider_options.index(chat_settings.provider),
+        key="chat_settings_provider"
     )
 
-    strategy_options = list(ChatSettings.PROMPT_STRATEGIES.keys())
+    mode = st.selectbox(
+        "Modus",
+        mode_options,
+        index=mode_options.index(chat_settings.mode),
+        key="chat_settings_mode"
+    )
 
-    selected_prompting_strategy = st.selectbox(
-        "Prompting-Strategie",
-        options=strategy_options,
-        index=strategy_options.index(
-            chat_settings.prompting_strategy
-        ),
-        format_func=lambda key: ChatSettings.PROMPT_STRATEGIES[key],
-        key="chat_settings_prompting_strategy",
+    threshold = st.slider(
+        "Confidence Threshold",
+        min_value=0.0,
+        max_value=5.0,
+        value=chat_settings.threshold,
+        step=0.1,
+        key="chat_settings_threshold"
+    )
+
+    max_tokens = st.slider(
+        "Max Tokens",
+        min_value=100,
+        max_value=2000,
+        value=chat_settings.max_tokens,
+        step=50,
+        key="chat_settings_max_tokens"
     )
 
     if st.button(
         "Einstellungen anwenden",
         use_container_width=True,
-        type="primary",
+        type="primary"
     ):
-        chat_settings.top_k = top_k
-        chat_settings.llm = selected_llm
-        chat_settings.prompting_strategy = (
-            selected_prompting_strategy
-        )
 
-        st.rerun()
+        chat_settings.role = role
+        chat_settings.provider = provider
+        chat_settings.mode = mode
+        chat_settings.threshold = threshold
+        chat_settings.max_tokens = max_tokens
+
+        st.success("Settings applied!")
+
+
+# RENDER-FUNKTIONEN FÜR DIE VIEW "CHAT HISTORY"
+
+# Rendert die Vorschau einer Konversation. Orientiert sich dabei am Schema aus "aktueller Chat"
+def render_chat_history_preview(conversation):
+    messages = conversation.get("messages", [])
+    conversation_id = conversation["id"]
+
+    if not messages:
+        st.caption("Keine Nachrichten vorhanden.")
+        return
+
+    with st.container(key=f"history_preview_container_{conversation_id}"):
+        for message_index, message in enumerate(messages):
+            role = message.get("role", "")
+            content = message.get("content", "")
+
+            if role == "user":
+                with st.container(key=f"history_user_message_container_{conversation_id}_{message_index}"):
+                    st.markdown(
+                        f"""
+                        <div class='chat-user-bubble'>
+                            {content}
+                        </div>
+                        """,
+                        unsafe_allow_html=True
+                    )
+
+            elif role == "assistant":
+                with st.container(key=f"history_assistant_box_{conversation_id}_{message_index}"):
+                    st.markdown(content)

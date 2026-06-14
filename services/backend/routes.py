@@ -4,9 +4,7 @@ from shutil import copyfileobj
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
-from schemas import ChatConversation
-from services.backend.chat_models import ChatRequest, ChatResponse
-from services.backend.testdummys import example_chunks
+from shared.schemas import ChatConversation
 from services.backend.chat_conversations import (
     create_chat_conversation,
     get_chat_conversations,
@@ -17,31 +15,6 @@ router = APIRouter()
 
 DOCUMENTS_DIRECTORY = Path(__file__).parent / "documents"
 DOCUMENTS_DIRECTORY.mkdir(exist_ok=True)
-
-
-@router.post("/chat", response_model=ChatResponse)
-def chat(request: ChatRequest):
-
-    user_message = request.message
-    settings = request.chat_settings
-
-    ai_response = (
-        f"Backend received: {user_message}\n\n"
-        f"Current Chat Settings:\n"
-        f"top_k = {settings.top_k}\n"
-        f"llm = {settings.llm}\n"
-        f"prompting_strategy = {settings.prompting_strategy}\n"
-    )
-    
-    sorted_chunks = sorted(example_chunks, key=lambda c: c.confidence_score, reverse=True)
-    top_k_chunks = sorted_chunks[:request.chat_settings.top_k]
-
-    print(user_message)
-
-    return ChatResponse(
-        response=ai_response,
-        chunks=top_k_chunks
-    )
 
 
 @router.post("/chat-conversations", response_model=ChatConversation)

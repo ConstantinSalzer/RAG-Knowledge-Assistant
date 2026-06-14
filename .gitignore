@@ -43,6 +43,7 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+CLAUDE.md
 
 # OS
 .DS_Store

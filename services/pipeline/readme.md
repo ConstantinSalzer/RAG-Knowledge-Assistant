@@ -19,8 +19,8 @@ docker compose run --rm augmentation python main.py
 
 inputs:
 
-- query, mode, style from frontend
-- chunks from vector database / reranker
+- frontend: query, style (tech, creative, defensive teomplate), resp length (max token), mode local/api
+- reranker: top k chunks
 
 output:
 
@@ -36,6 +36,7 @@ added timers for eval: -> total = eval + fetch + generation
 - maybe add feature for resp length? small, medium, big // character brackets
 
 - prompt compression (if generation time too big) -> timeout gen > 60s, maybe compress context
+
 - prompt caching (dont see it now)
 - prompt chaining: idk ... kinda did already with tavily
 - reranker: out of scope, part of retrieval?

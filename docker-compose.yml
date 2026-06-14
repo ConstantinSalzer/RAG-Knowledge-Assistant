@@ -14,53 +14,10 @@ services:
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   # --- AI Engine (Ollama) ---
-  ollama:
-    image: ollama/ollama:latest
-    container_name: rag_ollama
-    volumes:
-      - ollama_storage:/root/.ollama
-    ports:
-      - "11434:11434"
-    # For Apple Silicon/Mac, GPU is handled by Docker Desktop automatically.
-    # If on Linux with NVIDIA, uncomment the deploy block below:
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+  # Ollama runs natively on the host for Metal/GPU acceleration (see CLAUDE.md).
+  # Containers reach it via OLLAMA_URL=http://host.docker.internal:11435 (set in .env).
 
-  ollama-pull-models:
-    image: curlimages/curl:latest
-    container_name: ollama_pull_models
-    depends_on:
-      - ollama
-    entrypoint: /bin/sh
-    command:
-      - "-c"
-      - |
-        sleep 5;
-        echo "Downloading Embedding model..."
-        # Adding "stream": false makes curl wait for the full download
-        curl -X POST http://rag_ollama:11434/api/pull -d '{"name": "nomic-embed-text", "stream": false}'
-        
-        echo "Downloading Generation model..."
-        curl -X POST http://rag_ollama:11434/api/pull -d '{"name": "qwen2.5:1.5b", "stream": false}'
-        
-        echo "All models are now local. Exiting."
-        
   # --- RAG Services ---
-  retrieval:
-    build:
-      context: .
-      dockerfile: services/retrieval/Dockerfile
-    container_name: rag_retrieval
-    env_file: .env
-    depends_on:
-      - postgres
-      - ollama
-
   ingestion:
     build:
       context: .
@@ -69,25 +26,31 @@ services:
     env_file: .env
     depends_on:
       - postgres
-      - ollama
 
-  augmentation:
+  pipeline:
     build:
       context: .
-      dockerfile: services/augmentation/Dockerfile
-    container_name: rag_augmentation
+      dockerfile: services/pipeline/Dockerfile
+    container_name: rag_pipeline
+    volumes:
+      - ./services/pipeline:/app/services/pipeline
+      - ./shared:/app/shared
+    ports:
+      - "8000:8000"
     env_file: .env
-    depends_on:
-      - ollama
+    environment:
+      - PYTHONPATH=/app/services/pipeline
 
-  generation:
+  backend:
     build:
       context: .
-      dockerfile: services/generation/Dockerfile
-    container_name: rag_generation
+      dockerfile: services/backend/Dockerfile
+    container_name: rag_backend
+    ports:
+      - "8001:8000"
     env_file: .env
     depends_on:
-      - ollama
+      - postgres
 
   frontend:
     build:
@@ -97,9 +60,11 @@ services:
     ports:
       - "8501:8501"
     env_file: .env
+    environment:
+      - PIPELINE_URL=http://rag_pipeline:8000
+      - BACKEND_URL=http://rag_backend:8000
     depends_on:
-      - retrieval
+      - pipeline
+      - backend
 
-volumes:
-  ollama_storage:
-  # pg_data is handled by your relative bind mount ./data/pg_data
+# pg_data is handled by your relative bind mount ./data/pg_data

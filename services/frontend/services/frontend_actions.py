@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import json
 
-from schemas import ChatConversation
+from shared.schemas import ChatConversation
 from services.backend_client import BackendClient
 
 

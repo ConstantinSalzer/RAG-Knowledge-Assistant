@@ -1,4 +1,3 @@
-import html
 from datetime import datetime, timedelta
 
 import streamlit as st
@@ -6,7 +5,7 @@ import streamlit as st
 from services.backend_client import BackendClient
 from services.frontend_actions import load_chat_conversation
 from ui.css_styling import load_history_styles
-from ui.render_functions import render_section_header, render_list_item
+from ui.render_functions import render_section_header, render_list_item, render_chat_history_preview
 
 PAGE_KEY = "history"
 PAGE_NAME = "Chat History"
@@ -73,8 +72,7 @@ def render_chat_history_group(group_title, conversations):
         render_chat_history_item(conversation)
 
 
-# Rendert jeden einzelnen Chatverlauf als Item in der Historie: Zeigt Titel, Aktualisierungszeitpunkt 
-# und Buttons zum Laden der Konversation bzw. Anzeigen einer Vorschau an
+# Rendert ein Chatverlauf-Item: Titel, Aktualisierungszeitpunkt, Buttons zum Laden/Anzeigen einer Vorschau
 def render_chat_history_item(conversation):
 
     conversation_id = conversation["id"]
@@ -101,44 +99,6 @@ def render_chat_history_item(conversation):
     if is_open:
         render_chat_history_preview(conversation)
 
-
-# Rendert die Vorschau einer Konversation. Orientiert sich dabei am Schema aus "aktueller Chat"
-def render_chat_history_preview(conversation):
-    messages = conversation.get("messages", [])
-    conversation_id = conversation["id"]
-
-    if not messages:
-        st.caption("Keine Nachrichten vorhanden.")
-        return
-
-    with st.container(key=f"history_preview_container_{conversation_id}"):
-        for message_index, message in enumerate(messages):
-            role = message.get("role", "")
-            content = message.get("content", "")
-
-            if role == "user":
-                with st.container(key=f"history_user_message_container_{conversation_id}_{message_index}"):
-                    st.markdown(
-                        f"""
-                        <div class='chat-user-bubble'>
-                            {content}
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
-
-            elif role == "assistant":
-                content = content.strip()
-                safe_content = html.escape(content).replace("\n", "<br>")
-
-                st.markdown(
-                    f"""
-                    <div class='chat-assistant-box'>
-                        <div class='chat-assistant-bubble'>{safe_content}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
 
 # -----HILFSFUNKTIONEN-----
 
