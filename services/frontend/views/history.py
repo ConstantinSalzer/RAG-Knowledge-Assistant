@@ -1,10 +1,11 @@
-import streamlit as st
 from datetime import datetime, timedelta
+
+import streamlit as st
 
 from services.backend_client import BackendClient
 from services.frontend_actions import load_chat_conversation
 from ui.css_styling import load_history_styles
-from ui.render_functions import render_chat_history_preview
+from ui.render_functions import render_section_header, render_list_item, render_chat_history_preview
 
 PAGE_KEY = "history"
 PAGE_NAME = "Chat History"
@@ -15,10 +16,17 @@ PAGE_ICON = "⏳"
 def render_history():
 
     init_session_state()
+
     load_history_styles()
 
     backend_client = BackendClient()
-    chat_conversations = backend_client.get_chat_conversations()
+    
+    try:
+        chat_conversations = backend_client.get_chat_conversations()
+
+    except Exception as error:
+        st.error(f"Chatverläufe konnten nicht geladen werden: {error}")
+        return
 
     with st.container(key="history_page_container"):
         render_history_header()
@@ -30,7 +38,7 @@ def render_history():
             render_chat_history_group(group_title, conversations)
 
 
-# Initialisiert den Session State für (notwendig für den Button der jeweiligen Chat-Ansicht)
+# Initialisiert den Session State (notwendig für den Button der jeweiligen Chat-Ansicht)
 def init_session_state():
     if "open_history_conversation_id" not in st.session_state:
         st.session_state.open_history_conversation_id = None
@@ -57,15 +65,7 @@ def render_chat_history_group(group_title, conversations):
     if not conversations:
         return
 
-    st.markdown(
-        f"""
-        <div class='history-group-header'>
-            <div class='history-group-title'>{group_title}</div>
-            <div class='history-group-line'></div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    render_section_header(group_title)
 
     # Rendert jeden einzelnen Chatverlauf in der Gruppe nach bestimmten Schema
     for conversation in conversations:
@@ -74,38 +74,30 @@ def render_chat_history_group(group_title, conversations):
 
 # Rendert ein Chatverlauf-Item: Titel, Aktualisierungszeitpunkt, Buttons zum Laden/Anzeigen einer Vorschau
 def render_chat_history_item(conversation):
+
     conversation_id = conversation["id"]
-    updated_at = format_datetime(conversation["updated_at"])
+    updated_at = format_history_datetime(conversation["updated_at"])
     title = conversation["title"]
 
-    is_open = st.session_state.open_history_conversation_id == conversation_id
+    is_open = (st.session_state.open_history_conversation_id == conversation_id)
 
-    with st.container(key=f"history_item_container_{conversation_id}"):
-        item_col, load_col = st.columns([10, 1.6])
+    item_label = f"{updated_at}  |  {title}"
 
-        button_label = f"{updated_at}  |  {title}"
+    toggle_clicked, load_clicked = render_list_item(
+        item_label=item_label,
+        item_key=f"history_{conversation_id}",
+        action_label="Laden"
+    )
 
-        with item_col:
-            with st.container(key=f"history_item_toggle_container_{conversation_id}"):
-                if st.button(
-                    button_label,
-                    key=f"toggle_history_item_{conversation_id}",
-                    use_container_width=True
-                ):
-                    toggle_history_conversation(conversation_id)
+    if toggle_clicked:
+        toggle_history_conversation(conversation_id)
 
-        with load_col:
-            with st.container(key=f"history_item_load_container_{conversation_id}"):
-                if st.button(
-                    "Laden",
-                    key=f"load_chat_{conversation_id}",
-                    use_container_width=True
-                ):
-                    load_chat_conversation(conversation)
-                    st.rerun()
+    if load_clicked:
+        load_chat_conversation(conversation)
+        st.rerun()
 
-        if is_open:
-            render_chat_history_preview(conversation)
+    if is_open:
+        render_chat_history_preview(conversation)
 
 
 # -----HILFSFUNKTIONEN-----
@@ -145,7 +137,7 @@ def toggle_history_conversation(conversation_id):
     st.rerun()
 
 
-def format_datetime(value: str) -> str:
+def format_history_datetime(value: str) -> str:
     if not value:
         return ""
 

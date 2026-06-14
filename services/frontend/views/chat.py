@@ -49,17 +49,26 @@ def init_session_state():
 # Rendert den Chat-Header mit dem Titel und einem Button, der die Chat-Einstellungen öffnet
 def render_chat_header():
 
+    chat_settings = st.session_state.chat_settings
     header = st.container(key="chat_header_container")
 
     with header:
-        title_col, button_col = st.columns([8, 1])
+        title_col, settings_col, button_col = st.columns([4, 4, 1])
 
         with title_col:
             st.subheader("Aktueller Chat")
+        
+        with settings_col:
+            with st.container(key="chat_settings_summary_container"):
+                st.caption(
+                    f"Rolle: {chat_settings.role} | "
+                    f"Provider: {chat_settings.provider} | "
+                    f"Modus: {chat_settings.mode}"
+                )
 
-    with button_col:
-        with st.popover("⚙️"):
-            render_chat_settings_panel()
+        with button_col:
+            with st.popover("⚙️"):
+                render_chat_settings_panel()
 
 
 

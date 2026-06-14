@@ -7,7 +7,7 @@ from services.frontend_actions import save_current_chat, start_new_chat, load_ch
 from views import chat
 from views import history
 from views import documents
-from views import statistics
+from views import documentation
 
 views = {
     chat.PAGE_KEY: {
@@ -25,10 +25,10 @@ views = {
         "icon": documents.PAGE_ICON,
         "render": documents.render_documents,
     },
-    statistics.PAGE_KEY: {
-        "label": statistics.PAGE_NAME,
-        "icon": statistics.PAGE_ICON,
-        "render": statistics.render_statistics,
+    documentation.PAGE_KEY: {
+        "label": documentation.PAGE_NAME,
+        "icon": documentation.PAGE_ICON,
+        "render": documentation.render_documentation,
     },
 }
 
@@ -134,7 +134,8 @@ def render_sidebar_actions():
         key="upload_docs",
         use_container_width=True
     ):
-        st.toast("Dokument-Upload geöffnet (Dummy)")
+        st.session_state.selected_page = "documents"
+        st.rerun()
 
 
 def render_sidebar_chat_history():

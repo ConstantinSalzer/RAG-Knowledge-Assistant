@@ -1,5 +1,90 @@
 import streamlit as st
 
+def load_global_styles():
+
+    st.markdown(
+        """
+        <style>
+
+        /* -----STYLING ÜBERSCHRIFTEN----- */
+
+        .section-header {
+            margin-top: 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 0.35rem;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .section-line {
+            width: 100%;
+            height: 1px;
+            background-color: #d1d5db;
+        }
+
+
+        /* -----STYLING LISTENEINTRÄGE----- */
+
+        div[class*="st-key-list_item_toggle_container_"]
+        div[data-testid="stButton"] button {
+            justify-content: flex-start !important;
+            text-align: left !important;
+            border: none !important;
+            box-shadow: none !important;
+            background-color: transparent !important;
+        }
+
+        div[class*="st-key-list_item_toggle_container_"]
+        div[data-testid="stButton"] button * {
+            justify-content: flex-start !important;
+            text-align: left !important;
+        }
+
+        div[class*="st-key-list_item_toggle_container_"]
+        div[data-testid="stButton"] button span {
+            width: 100%;
+        }
+
+        div[class*="st-key-list_item_toggle_container_"]
+        div[data-testid="stButton"] button:hover {
+            border: none !important;
+            box-shadow: none !important;
+            background-color: #f3f4f6 !important;
+        }
+
+
+        /* -----STYLING AKTIONSBUTTON----- */
+
+        div[class*="st-key-list_item_action_container_"]
+        div[data-testid="stButton"] button {
+            min-height: 0 !important;
+            height: 2.3rem !important;
+            padding: 0.15rem 0.55rem !important;
+            border: 1px solid #e5e7eb !important;
+            background-color: #f9fafb !important;
+            color: #4b5563 !important;
+            box-shadow: none !important;
+        }
+
+        div[class*="st-key-list_item_action_container_"]
+        div[data-testid="stButton"] button:not(:disabled):hover {
+            border-color: #d1d5db !important;
+            background-color: #f3f4f6 !important;
+            color: #374151 !important;
+        }
+
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
 def load_chat_styles():
     
     st.markdown("""
@@ -8,7 +93,7 @@ def load_chat_styles():
         /* -----STYLING AUFBAU CHAT SEITE----- */
                                 
         /* block-Klasse ist die übergeordnete Klasse für alle Blöcke auf einer Seite. Es handelt sich
-        um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorghen dafür,
+        um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorgen dafür,
         dass der Inhalt direkt ganz oben beginnt und die maximale Breite begrenzt wird. */
                 
         .block-container {
@@ -32,6 +117,10 @@ def load_chat_styles():
             border-bottom: 1px solid #d1d5db;
             padding-bottom: 0.5rem;
             margin-bottom: 1rem;
+        }
+                
+        .st-key-chat_settings_summary_container {
+            padding-top: 1rem;
         }
                 
         .st-key-chat_conversation_container {
@@ -90,6 +179,7 @@ def load_chat_styles():
             color: #111111;
             max-width: 80%;
             line-height: 1.6;
+            white-space: pre-wrap;
         }
 
         /* Chat Chunk Box Settings als Container für Expander*/
@@ -139,7 +229,7 @@ def load_history_styles():
         /* -----STYLING AUFBAU HISTORY SEITE----- */
                                                 
         /* block-Klasse ist die übergeordnete Klasse für alle Blöcke auf einer Seite. Es handelt sich
-        um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorghen dafür,
+        um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorgen dafür,
         dass der Inhalt direkt ganz oben beginnt und die maximale Breite begrenzt wird. */
                 
         .block-container {
@@ -171,74 +261,6 @@ def load_history_styles():
             overflow-y: auto;
             border: none;
             padding-right: 0.5rem;
-        }
-                
-        /* -----STYLING GRUPPEN-ÜBERSCHRIFTEN----- */
-                
-        .history-group-header {
-            margin-top: 1.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .history-group-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #4b5563;
-            margin-top: 0;
-            margin-bottom: 0.35rem;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .history-group-line {
-            height: 1px;
-            width: 100%;
-            background-color: #d1d5db;
-        }
-                
-
-        /* -----STYLING BUTTON EINZELNE CHATVERLÄUFE----- */
-                                
-        div[class*="st-key-history_item_toggle_container_"] div[data-testid="stButton"] button {
-            justify-content: flex-start !important;
-            text-align: left !important;
-            border: none !important;
-            box-shadow: none !important;
-            background-color: transparent !important;
-        }
-
-        div[class*="st-key-history_item_toggle_container_"] div[data-testid="stButton"] button * {
-            justify-content: flex-start !important;
-            text-align: left !important;
-        }
-
-        div[class*="st-key-history_item_toggle_container_"] div[data-testid="stButton"] button span {
-            width: 100%;
-        }
-
-        div[class*="st-key-history_item_toggle_container_"] div[data-testid="stButton"] button:hover {
-            border: none !important;
-            box-shadow: none !important;
-            background-color: #f3f4f6 !important;
-        }
-
-                
-        /* -----STYLING LOAD BUTTON----- */
-
-        div[class*="st-key-history_item_load_container_"] div[data-testid="stButton"] button {
-            min-height: 0 !important;
-            height: 2.3rem !important;
-            padding: 0.15rem 0.55rem !important;
-
-            border: 1px solid #e5e7eb !important;
-            background-color: #f9fafb !important;
-            color: #4b5563 !important;
-            box-shadow: none !important;
-        }
-        div[class*="st-key-history_item_load_container_"] div[data-testid="stButton"] button:hover {
-            border-color: #d1d5db !important;
-            background-color: #f3f4f6 !important;
-            color: #374151 !important;
         }
                 
 
@@ -278,8 +300,77 @@ def load_history_styles():
             color: #111111;
             max-width: 80%;
             line-height: 1.6;
+            white-space: pre-wrap;
         }
                         
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+def load_documents_styles():
+
+    st.markdown("""
+        <style>
+        
+        /* -----STYLING AUFBAU DOCUMENTS SEITE----- */
+                                                
+        /* block-Klasse ist die übergeordnete Klasse für alle Blöcke auf einer Seite. Es handelt sich
+        um eine von Streamlit vordefinierte Klasse. Die hier getroffenen Änderung sorgen dafür,
+        dass der Inhalt direkt ganz oben beginnt und die maximale Breite begrenzt wird. */
+                
+        .block-container {
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;    
+            
+            padding-top: 3rem;
+            padding-bottom: 0rem;
+        }
+                        
+        .st-key-documents_page_container {
+            height: calc(100vh - 7rem);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }  
+                
+        .st-key-documents_header_container {
+            border-bottom: 1px solid #d1d5db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+                
+        .st-key-documents_content_container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+        
+
+        /* -----STYLING DOKUMENTENUPLOAD BEREICH----- */
+                
+        .st-key-documents_upload_container {
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        
+        /* -----STYLING METADATENFENSTER----- */
+                
+        div[class*="st-key-document_preview_container_"] {
+            width: 92%;
+            margin: 0.5rem auto 1rem auto;
+            padding: 1rem 1.25rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            background-color: #ffffff;
+        }
+                
         </style>
         """,
         unsafe_allow_html=True
