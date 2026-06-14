@@ -59,9 +59,17 @@ def render_chat_header():
         
         with settings_col:
             with st.container(key="chat_settings_summary_container"):
+                llm_label = ChatSettings.LLM_OPTIONS[
+                    chat_settings.llm
+                ]
+
+                strategy_label = ChatSettings.PROMPT_STRATEGIES[
+                    chat_settings.prompting_strategy
+                ]
+
                 st.caption(
-                    f"Modell: {chat_settings.llm} | "
-                    f"Prompting: {chat_settings.prompting_strategy} | "
+                    f"Modell: {llm_label} | "
+                    f"Prompting: {strategy_label} | "
                     f"Chunks: {chat_settings.top_k}"
                 )
 

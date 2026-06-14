@@ -2,6 +2,7 @@ import streamlit as st
 import html
 
 from services.frontend_actions import copy_to_clipboard_button
+from schemas import ChatSettings
 
 
 # ALLGEMEINE RENDER-FUNKTIONEN
@@ -158,34 +159,43 @@ def render_chat_settings_panel():
 
     top_k = st.slider(
         "Anzahl an Chunks",
-        chat_settings.MIN_TOP_K,
-        chat_settings.MAX_TOP_K,
+        min_value=ChatSettings.MIN_TOP_K,
+        max_value=ChatSettings.MAX_TOP_K,
         value=chat_settings.top_k,
-        key="chat_settings_top_k"
+        key="chat_settings_top_k",
     )
+
+    llm_options = list(ChatSettings.LLM_OPTIONS.keys())
 
     selected_llm = st.selectbox(
-        "Ausführungsmodus LLM",
-        chat_settings.LLM_OPTIONS,
-        index=chat_settings.LLM_OPTIONS.index(chat_settings.llm),
-        key="chat_settings_llm"
+        "Modell",
+        options=llm_options,
+        index=llm_options.index(chat_settings.llm),
+        format_func=lambda key: ChatSettings.LLM_OPTIONS[key],
+        key="chat_settings_llm",
     )
 
-    prompting_strategy = st.selectbox(
-        "Prompting Stil",
-        chat_settings.PROMPT_STRATEGIES,
-        index=chat_settings.PROMPT_STRATEGIES.index(chat_settings.prompting_strategy),
-        key="chat_settings_prompting_strategy"
+    strategy_options = list(ChatSettings.PROMPT_STRATEGIES.keys())
+
+    selected_prompting_strategy = st.selectbox(
+        "Prompting-Strategie",
+        options=strategy_options,
+        index=strategy_options.index(
+            chat_settings.prompting_strategy
+        ),
+        format_func=lambda key: ChatSettings.PROMPT_STRATEGIES[key],
+        key="chat_settings_prompting_strategy",
     )
 
     if st.button(
         "Einstellungen anwenden",
         use_container_width=True,
-        type="primary"
+        type="primary",
     ):
-
         chat_settings.top_k = top_k
         chat_settings.llm = selected_llm
-        chat_settings.prompting_strategy = prompting_strategy
+        chat_settings.prompting_strategy = (
+            selected_prompting_strategy
+        )
 
         st.rerun()

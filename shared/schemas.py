@@ -40,11 +40,28 @@ class ChatConversation(BaseModel):
 
 class ChatSettings(BaseModel):
     top_k: int = 5
-    llm: str = "Lokal"
-    prompting_strategy: str = "Kreativ"
+
+    llm: Literal[
+        "local",
+        "api",
+    ] = "local"
+
+    prompting_strategy: Literal[
+        "technical",
+        "creative",
+        "defensive",
+    ] = "creative"
 
     MIN_TOP_K: ClassVar[int] = 1
     MAX_TOP_K: ClassVar[int] = 10
 
-    LLM_OPTIONS: ClassVar[list[str]] = ["Lokal", "API"]
-    PROMPT_STRATEGIES: ClassVar[list[str]] = ["Technisch", "Kreativ", "Defensiv"]
+    LLM_OPTIONS: ClassVar[dict[str, str]] = {
+        "local": "Lokal",
+        "api": "Cloud API",
+    }
+
+    PROMPT_STRATEGIES: ClassVar[dict[str, str]] = {
+        "technical": "Technisch",
+        "creative": "Kreativ",
+        "defensive": "Defensiv",
+    }
