@@ -19,9 +19,6 @@ Das Projekt enthält:
 Bewusst nicht enthalten:
 
 - Web-Oberfläche
-- Audit-Trail
-- Explainability-Modul
-- Determinismus-Modul
 - Frontend
 
 ## Architektur
