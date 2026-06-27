@@ -18,6 +18,18 @@ services:
   # Containers reach it via OLLAMA_URL=http://host.docker.internal:11435 (set in .env).
 
   # --- RAG Services ---
+  retrieval:
+    build:
+      context: .
+      dockerfile: services/retrieval/Dockerfile
+    container_name: rag_retrieval
+    ports:
+      - "8002:8001"
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD:-password123}@postgres:5432/rag_db
+    depends_on:
+      - postgres
+
   ingestion:
     build:
       context: .
@@ -40,6 +52,9 @@ services:
     env_file: .env
     environment:
       - PYTHONPATH=/app/services/pipeline
+      - RETRIEVAL_URL=http://retrieval:8001
+    depends_on:
+      - retrieval
 
   backend:
     build:
@@ -49,7 +64,10 @@ services:
     ports:
       - "8001:8000"
     env_file: .env
+    environment:
+      - RETRIEVAL_URL=http://retrieval:8001
     depends_on:
+      - retrieval
       - postgres
 
   frontend:

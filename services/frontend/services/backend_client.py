@@ -31,13 +31,13 @@ class BackendClient:
 
     # Erhält gespeicherte Chat-Konversationen aus dem Backend
     def get_chat_conversations(self):
+        try:
+            response = requests.get(f"{self.backend_url}/chat-conversations")
+            response.raise_for_status()
+            return response.json()
+        except Exception:
+            return []
 
-        response = requests.get(
-            f"{self.backend_url}/chat-conversations"
-        )
-
-        response.raise_for_status()
-        return response.json()
 
     # Speichert eine Konversation und gibt diese ans Backend weiter
     def save_chat_conversation(self, chat_conversation):

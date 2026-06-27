@@ -1,9 +1,12 @@
 import logging
 import json
+import os
 import time
 from fastapi import FastAPI
 from typing import List, Optional
 from pydantic import TypeAdapter
+
+import requests as http_client
 
 from shared.schemas import ChatRequest, ChatResponse, ChatMessage, Settings, Chunk
 
@@ -18,41 +21,29 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# Mocked retrieval results; real retrieval is not yet wired in
-def get_mock_chunks() -> List[Chunk]:
 
-    return [
-        Chunk(
-            file_name="machine_learning_basics.pdf",
-            author="Max Mustermann",
-            confidence_score=4.8,
-            content="Machine Learning bezeichnet Verfahren, bei denen Computer aus Daten lernen, ohne explizit programmiert zu werden."
-        ),
-        Chunk(
-            file_name="rag_architecture_notes.docx",
-            author="Laura Schmidt",
-            confidence_score=4.3,
-            content="Retrieval-Augmented Generation kombiniert klassische Informationssuche mit Large Language Models."
-        ),
-        Chunk(
-            file_name="database_systems_summary.txt",
-            author="Jonas Weber",
-            confidence_score=3.9,
-            content="Relationale Datenbanken speichern Daten tabellarisch und verwenden SQL für Abfragen. NoSQL-Datenbanken bieten dagegen flexible Datenstrukturen."
-        ),
-        Chunk(
-            file_name="network_security_script.pdf",
-            author="Anna Keller",
-            confidence_score=4.6,
-            content="Firewalls überwachen den Netzwerkverkehr und blockieren unerlaubte Zugriffe. Verschlüsselungsverfahren schützen Daten vor Manipulation und unbefugtem Zugriff."
-        ),
-        Chunk(
-            file_name="software_engineering_notes.md",
-            author="David Fischer",
-            confidence_score=2.7,
-            content="Agile Softwareentwicklung basiert auf iterativen Entwicklungszyklen, regelmäßigem Feedback und enger Zusammenarbeit im Team."
+def get_retrieval_chunks(query: str, limit: int = 10) -> List[Chunk]:
+    retrieval_url = os.getenv("RETRIEVAL_URL", "http://retrieval:8001")
+    try:
+        response = http_client.post(
+            f"{retrieval_url}/search",
+            json={"query": query, "limit": limit},
+            timeout=15,
         )
-    ]
+        response.raise_for_status()
+        results = response.json()
+        return [
+            Chunk(
+                file_name=item.get("title") or item.get("arxiv_id", "unknown"),
+                author=item.get("authors", "Unknown"),
+                confidence_score=round(item.get("similarity", 0.0) * 5, 2),
+                content=item.get("text", ""),
+            )
+            for item in results
+        ]
+    except Exception as exc:
+        logger.warning(f"Retrieval service unavailable: {exc}. Using empty chunks.")
+        return []
 
 @app.post("/augment", response_model=ChatResponse)
 async def augment(request: ChatRequest):
@@ -77,10 +68,10 @@ def run_pipeline(query, settings: Settings, history: Optional[List[ChatMessage]]
         )
 
     try:
-        # 1. Retrieve the mock data
+        # 1. Retrieve relevant chunks from retrieval service
         step_start = time.time()
-        all_chunks = get_mock_chunks()
-        logger.info(f"[TIMER] get_mock_chunks (main.py): {time.time() - step_start:.3f}s")
+        all_chunks = get_retrieval_chunks(query)
+        logger.info(f"[TIMER] get_retrieval_chunks (main.py): {time.time() - step_start:.3f}s")
 
         # 2. Evaluator
         step_start = time.time()

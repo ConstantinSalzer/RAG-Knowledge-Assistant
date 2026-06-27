@@ -1,6 +1,8 @@
+import logging
+import os
 from pathlib import Path
-from shutil import copyfileobj
 
+import requests
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 
@@ -11,10 +13,14 @@ from services.backend.chat_conversations import (
     save_chat_conversation,
 )
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter()
 
 DOCUMENTS_DIRECTORY = Path(__file__).parent / "documents"
 DOCUMENTS_DIRECTORY.mkdir(exist_ok=True)
+
+RETRIEVAL_URL = os.getenv("RETRIEVAL_URL", "http://retrieval:8001")
 
 
 @router.post("/chat-conversations", response_model=ChatConversation)
@@ -44,11 +50,25 @@ def upload_documents(
     for uploaded_file in files:
         file_name = Path(uploaded_file.filename).name
         file_path = DOCUMENTS_DIRECTORY / file_name
+        file_bytes = uploaded_file.file.read()
 
         with file_path.open("wb") as target_file:
-            copyfileobj(uploaded_file.file, target_file)
+            target_file.write(file_bytes)
 
-        saved_files.append(file_name)
+        chunks_stored = 0
+        try:
+            resp = requests.post(
+                f"{RETRIEVAL_URL}/ingest",
+                files={"file": (file_name, file_bytes, uploaded_file.content_type or "application/pdf")},
+                data={"title": Path(file_name).stem, "author": "Unknown"},
+                timeout=120,
+            )
+            if resp.ok:
+                chunks_stored = resp.json().get("chunks_stored", 0)
+        except Exception as exc:
+            logger.warning(f"Ingestion failed for {file_name}: {exc}")
+
+        saved_files.append({"name": file_name, "chunks_stored": chunks_stored})
 
     return {
         "count": len(saved_files),

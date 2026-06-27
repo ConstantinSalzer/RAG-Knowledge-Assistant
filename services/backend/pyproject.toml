@@ -6,6 +6,7 @@ dependencies = [
     "uvicorn",
     "pydantic",
     "python-multipart",
+    "requests",
     "shared",
 ]
 
