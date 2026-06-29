@@ -66,6 +66,7 @@ services:
     env_file: .env
     environment:
       - RETRIEVAL_URL=http://retrieval:8001
+      - DATABASE_URL=postgresql+psycopg://postgres:${POSTGRES_PASSWORD:-password123}@postgres:5432/rag_db
     depends_on:
       - retrieval
       - postgres

@@ -20,7 +20,7 @@ def render_history():
     load_history_styles()
 
     backend_client = BackendClient()
-    
+
     try:
         chat_conversations = backend_client.get_chat_conversations()
 
@@ -29,7 +29,16 @@ def render_history():
         return
 
     with st.container(key="history_page_container"):
-        render_history_header()
+        search_query = render_history_header()
+
+    # Suche läuft client-seitig auf den bereits geladenen Konversationen –
+    # kein extra Request ans Backend nötig, da die Liste ohnehin komplett geladen wird.
+    if search_query:
+        query_lower = search_query.lower()
+        chat_conversations = [
+            c for c in chat_conversations
+            if query_lower in c["title"].lower()
+        ]
 
     with st.container(key="history_conversation_list_container"):
         grouped_conversations = group_chat_conversations_by_updated_at(chat_conversations)
@@ -44,20 +53,26 @@ def init_session_state():
         st.session_state.open_history_conversation_id = None
 
 
-# Rendert den Chat-Header mit dem Titel und einem Button zur Suche im Chatverlauf
-def render_history_header():
+# Rendert den Chat-Header mit dem Titel und einem Suchfeld
+def render_history_header() -> str:
 
     header = st.container(key="history_header_container")
 
     with header:
-        title_col, button_col = st.columns([10, 3.9])
+        title_col, search_col = st.columns([5, 5])
 
         with title_col:
             st.subheader("Historische Chatverläufe")
 
-        with button_col:
-            if st.button("🔍 Chat durchsuchen", key="search_history"):
-                st.toast("Chat-Suche geöffnet (Dummy)")
+        with search_col:
+            search_query = st.text_input(
+                "Suche",
+                placeholder="🔍 Chat durchsuchen...",
+                label_visibility="collapsed",
+                key="history_search",
+            )
+
+    return search_query
 
 
 # Rendert eine Gruppe von Chatverläufen: Jede Gruppe hat einen Titel und eine Liste von Chatverläufen
